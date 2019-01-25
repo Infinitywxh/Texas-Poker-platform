@@ -1,7 +1,8 @@
 import random
 import os
 from lib.texaspoker import State
-
+from lib.testcardlevel import test1
+from lib.testcardlevel import test2
 if __name__ == '__main__':
     # main routine
     # 0 黑桃 1 红桃 2 方片 3 草花
@@ -15,17 +16,13 @@ if __name__ == '__main__':
 
     state = State(totalPlayer, initMoney, bigBlind)
 
-    '''
-    向玩家AI发送的信息：state, player
-    从玩家AI接受的信息：decision = (give-up, allin, check, callbet, raisebet, amount)
-    '''
-
     # 洗牌，准备牌堆
-    cardHeap = list(range(0,52))
+    cardHeap = list(range(0, 52))
     random.shuffle(cardHeap)
 
     # pre-flop begin
     print('$$$ pre-flop begin')
+
     # 小盲注、大盲注
     state.nextpos(button)
     state.player[state.currpos].raisebet(bigBlind // 2)
@@ -38,6 +35,7 @@ if __name__ == '__main__':
     state.nextpos(state.currpos)
     state.player[state.currpos].raisebet(bigBlind)
     state.moneypot += bigBlind
+
     print(state)
     print(state.player[state.currpos])
     print("## player %s bigBlind: %s" % (state.currpos, bigBlind))
@@ -45,69 +43,44 @@ if __name__ == '__main__':
     state.play_round(0)
 
     # pre-flop ended
-    for i in range(totalPlayer):
-        if state.player[i].active == False:
-            continue
-        state.player[i].totalbet += state.player[i].bet
-        state.player[i].bet = 0
+    state.update(totalPlayer)
     state.sharedcards = cardHeap[0:3]
 
     # flop begin
     print('$$$ flop begin')
     #TODO 如果所有人一直看牌（check）会怎么样 ?
 
-    state.turnNum = 1
-    state.currpos = button
-    state.minbet = 0
-    state.last_raised = bigBlind
+    state.restore(1, button, bigBlind)
 
     state.play_round(1)
 
 
     # flop ended
-    for i in range(totalPlayer):
-        if state.player[i].active == False:
-            continue
-        state.player[i].totalbet += state.player[i].bet
-        state.player[i].bet = 0
+    state.update(totalPlayer)
     state.sharedcards = cardHeap[0:4]
 
     # turn begin
     print('$$$ turn begin')
     #TODO 如果所有人一直看牌（check）会怎么样 ?
 
-    state.turnNum = 2
-    state.currpos = button
-    state.minbet = 0
-    state.last_raised = bigBlind
+    state.restore(2, button, bigBlind)
 
     state.play_round(2)
 
     # turn ended
-    for i in range(totalPlayer):
-        if state.player[i].active == False:
-            continue
-        state.player[i].totalbet += state.player[i].bet
-        state.player[i].bet = 0
+    state.update(totalPlayer)
     state.sharedcards = cardHeap[0:5]
 
     # river begin
     print('$$$ river begin')
     #TODO 如果所有人一直看牌（check）会怎么样 ?
 
-    state.turnNum = 3
-    state.currpos = button
-    state.minbet = 0
-    state.last_raised = bigBlind
+    state.restore(3, button, bigBlind)
 
     state.play_round(3)
 
     # river ended
-    for i in range(totalPlayer):
-        if state.player[i].active == False:
-            continue
-        state.player[i].totalbet += state.player[i].bet
-        state.player[i].bet = 0
+    state.update(totalPlayer)
 
 
     print("game ended")
@@ -136,44 +109,5 @@ if __name__ == '__main__':
     # main routine ended
 
 
-    '''
-    # 测试：计算牌面 level
-
-    A = [0] * 7
-    for i in range(7):
-        A[i] = random.randint(0, 51)
-    print(A)
-    B = [[0 for col in range(2)] for row in range(7)]
-    for i in range(7):
-        B[i][0] = id2color(A[i])
-        B[i][1] = id2num(A[i])
-    B.sort(key=lambda f: f[1])
-    for i in B:
-        print("color = %s, num = %s" % (i[0], i[1]))
-    a = Hand(A)
-    print(a.level)
-    '''
-
-    '''
-    while True:
-        A = [0] * 7
-        for i in range(7):
-            A[i] = random.randint(0, 51)
-        print(A)
-        B = [[0 for col in range(2)] for row in range(7)]
-        for i in range(7):
-            B[i][0] = id2color(A[i])
-            B[i][1] = id2num(A[i])
-
-        B.sort(key=lambda f: f[1])
-        # for i in B:
-        #    print("color = %s, num = %s" % (i[0], i[1]))
-        a = Hand(A)
-        print(a.level)
-        if a.level == 10:
-            # print(A)
-            for i in B:
-                print("color = %s, num = %s" % (i[0], i[1]))
-            # print(a.level)
-            break
-    '''
+# test1()
+# test2()
