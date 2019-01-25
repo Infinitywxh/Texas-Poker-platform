@@ -269,6 +269,18 @@ class State(object):
         return 'state: currpos = %s, playernum = %s, moneypot = %s, \n minbet = %s, last_raised = %s' \
                % (self.currpos, self.playernum, self.moneypot, self.minbet, self.last_raised)
 
+    def restore(self, turn, button, bigBlind):      # restore the state before each round
+        self.turnNum = turn
+        self.currpos = button
+        self.minbet = 0
+        self.last_raised = bigBlind
+
+    def update(self, totalPlayer):                       # update the state after each round
+        for i in range(totalPlayer):
+            if self.player[i].active == False:
+                continue
+            self.player[i].totalbet += self.player[i].bet
+            self.player[i].bet = 0
 
     def round_over(self):
         if self.playernum == 1:        #TODO 游戏结束  只剩1人?
@@ -358,11 +370,9 @@ class State(object):
             else:  # 不合法行动
                 illegalmove(self.currpos)
                 continue
+
             print(self)
             print(self.player[self.currpos])
-            # print('round summary: player bet = %s, player money = %s' % (player[self.currpos].bet, player[self.currpos].money))
-            # print('self minbet = %s, active player = %s' % (self.minbet, self.playernum))
-
 
     def findwinner(self):       # 从active的玩家中找到一个赢家
         winpos = -1
