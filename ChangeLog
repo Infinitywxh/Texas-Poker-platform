@@ -1,0 +1,16 @@
+PROJECT: starfleet
+AUTHOR: bfan
+CREATED: 2017-04-11
+      
+    
+# Change Log
+All notable changes to this project will be documented in this file.
+Usually each item is adhered to one release number change
+
+%BUILD[20190128-0013]
+    
+
+@[0.0.1]
+# 2017-04-11
+## project is initialzed
+- project initialized, this should be the *very* first version

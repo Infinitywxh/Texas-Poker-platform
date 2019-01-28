@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package Dealer;
+
+// The greeting service definition.
+service Game {
+  // Sends a greeting
+  rpc SendJob (stream DealerRequest) returns (stream DealerReply) {}
+}
+
+// The request message containing the user's command.
+message DealerRequest {
+  string user = 1;
+  string token = 2;
+  string identity = 3;
+  string command = 4; // this tells what type of job it is, could be info, op, command, script
+  bytes job = 5;  // this is the serialized version of the real job
+  int32 type = 6; // 0 as info and 1 as command
+}
+
+// The response message containing the greetings
+message DealerReply {
+  bool status  = 1;
+  string message = 2;
+  bytes data = 3;
+}
+
