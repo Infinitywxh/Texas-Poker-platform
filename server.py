@@ -32,7 +32,9 @@ class GameServer(rpc.GameServicer):
             # Check if there are any new messages
             for item in request_iterator:
                 self.request.append(item)
+                print('get->', item)
                 while len(self.response) != 0:
+                    print(self.response[0])
                     yield self.response.pop()
 
     def run(self):

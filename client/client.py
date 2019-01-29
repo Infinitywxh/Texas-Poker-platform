@@ -37,23 +37,25 @@ class Client(object):
     def chat_with_server(self):
         while True:
             if len(self._new_request) != 0:
-                # self._lock.acquire()
+                self._lock.acquire()
                 msg = self._new_request.pop(0)
-                # self._lock.release()
-                print(msg)
+                print('request->', msg)
+                self._lock.release()
                 yield msg
+
+    def run(self):
+        """this is where you shall work"""
+        while True:
+            self.add_request(Client.HeartBeat())
+            time.sleep(1)
 
     def start(self):
         """
         """
         responses = self.conn.GameStream(self.chat_with_server())
         for res in responses:
-            print(res)
-
-    def run(self):
-        while True:
-            self.add_request(Client.HeartBeat())
-            time.sleep(1)
+            self._new_response.append(res)
+            print('response ->', res)
 
     def add_request(self, msg):
         self._lock.acquire()
@@ -63,7 +65,6 @@ class Client(object):
     @staticmethod
     def HeartBeat():
         return dealer_pb2.DealerRequest(command='heartbeat')
-
 
 if __name__ == '__main__':
     username = 'bfan'
