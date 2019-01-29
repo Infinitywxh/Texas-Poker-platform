@@ -5,7 +5,7 @@ package Dealer;
 // The greeting service definition.
 service Game {
   // Sends a greeting
-  rpc SendJob (stream DealerRequest) returns (stream DealerReply) {}
+  rpc GameStream (stream DealerRequest) returns (stream DealerReply) {}
 }
 
 // The request message containing the user's command.
