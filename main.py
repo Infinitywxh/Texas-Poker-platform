@@ -3,27 +3,26 @@ import os
 from lib.texaspoker import State
 from lib.testcardlevel import test1
 from lib.testcardlevel import test2
-if __name__ == '__main__':
+def mainRoutine():
     # main routine
-    # 0 黑桃 1 红桃 2 方片 3 草花
-    # 牌的id: 0-51
+    # id of the card: 0-51
 
-    initMoney = 1000    # 初始钱数
-    bigBlind = 20       # 大盲注
-    totalPlayer = 5     # 玩家人数
-    button = 0          # 庄家位置
+    initMoney = 1000
+    bigBlind = 20
+    totalPlayer = 5
+    button = 0
 
 
     state = State(totalPlayer, initMoney, bigBlind)
 
-    # 洗牌，准备牌堆
+    # shuffle the cards
     cardHeap = list(range(0, 52))
     random.shuffle(cardHeap)
 
     # pre-flop begin
     print('$$$ pre-flop begin')
 
-    # 小盲注、大盲注
+    # small and big blind
     state.nextpos(button)
     state.player[state.currpos].raisebet(bigBlind // 2)
     state.moneypot += bigBlind // 2
@@ -48,7 +47,6 @@ if __name__ == '__main__':
 
     # flop begin
     print('$$$ flop begin')
-    #TODO 如果所有人一直看牌（check）会怎么样 ?
 
     state.restore(1, button, bigBlind)
 
@@ -61,7 +59,6 @@ if __name__ == '__main__':
 
     # turn begin
     print('$$$ turn begin')
-    #TODO 如果所有人一直看牌（check）会怎么样 ?
 
     state.restore(2, button, bigBlind)
 
@@ -73,7 +70,6 @@ if __name__ == '__main__':
 
     # river begin
     print('$$$ river begin')
-    #TODO 如果所有人一直看牌（check）会怎么样 ?
 
     state.restore(3, button, bigBlind)
 
@@ -85,7 +81,7 @@ if __name__ == '__main__':
 
     print("game ended")
 
-    # game over, 开始分配彩池
+    # game over, allocate the money pot
 
     totalmoney = state.moneypot
 
