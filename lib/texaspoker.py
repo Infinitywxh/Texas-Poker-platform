@@ -1,11 +1,11 @@
 import random
 import os
-from naive import naive_ai
+from AI.naive import naive_ai
 from time import sleep
 import server
 import main
-import dealer_pb2 as dealer_pb2
-import dealer_pb2_grpc as rpc
+import communicate.dealer_pb2 as dealer_pb2
+import communicate.dealer_pb2_grpc as rpc
 
 # alter the id into color
 def id2color(card):
@@ -291,7 +291,7 @@ class State(object):
         return 1
 
     def nextpos(self, pos):
-        self.currpos = (pos + 1) % main.totalplayer
+        self.currpos = (pos + 1) % main.totalPlayer
         return self.currpos
 
     def play_round(self, round):
