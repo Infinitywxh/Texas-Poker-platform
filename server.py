@@ -5,16 +5,15 @@ import time
 
 import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
-
+import main
 
 class GameServer(rpc.GameServicer):
 
-    def __init__(self, state):
+    def __init__(self):
         # List with all the chat history
-        self.state = state
 
-        self.request = []
-        self.response = []
+        self.request = [[] for col in range(state.playernum)]
+        self.response = [[] for col in range(state.playernum)]
 
     # The stream which will be used to send new messages to clients
     def GameStream(self, request_iterator, context):
@@ -28,25 +27,23 @@ class GameServer(rpc.GameServicer):
         """
         lastindex = 0
         # For every client a infinite loop starts (in gRPC's own managed thread)
-        while True:
+        # print('gamestream called')
+        # while True:
+            # print('a loop in server')
             # Check if there are any new messages
-            for item in request_iterator:
+        for item in request_iterator:
+            # print('server received a requeset')
+            if item.type == 1:
                 self.request.append(item)
-                print('get->', item)
-                while len(self.response) != 0:
-                    print(self.response[0])
-                    yield self.response.pop()
+            while len(self.response) != 0:
+                yield self.response.pop()
 
     def run(self):
-        while True:
-            if len(self.request) != 0:
-                request = self.request.pop()
-                self.response.append(GameServer.void_reply())
-            time.sleep(0.1)
+        main.mainroutine()
 
     @staticmethod
     def void_reply():
-        return dealer_pb2.DealerReply(message='void')
+        return dealer_pb2.DealerRequest(command='void')
 
 
 if __name__ == '__main__':
