@@ -3,14 +3,17 @@ import os
 from lib.texaspoker import State
 from lib.testcardlevel import test1
 from lib.testcardlevel import test2
-def mainRoutine():
+initMoney = 1000
+bigBlind = 20
+totalPlayer = 5
+button = 0
+def mainroutine():
     # main routine
     # id of the card: 0-51
-
-    initMoney = 1000
-    bigBlind = 20
-    totalPlayer = 5
-    button = 0
+    global initMoney
+    global binBlind
+    global totalPlayer
+    global button
 
 
     state = State(totalPlayer, initMoney, bigBlind)
