@@ -12,8 +12,8 @@ class GameServer(rpc.GameServicer):
     def __init__(self):
         # List with all the chat history
 
-        self.request = [[] for col in range(state.playernum)]
-        self.response = [[] for col in range(state.playernum)]
+        self.request = [[] for col in range(main.totalPlayer)]
+        self.response = [[] for col in range(main.totalPlayer)]
 
     # The stream which will be used to send new messages to clients
     def GameStream(self, request_iterator, context):
@@ -46,15 +46,14 @@ class GameServer(rpc.GameServicer):
         return dealer_pb2.DealerRequest(command='void')
 
 
-if __name__ == '__main__':
-    port = 11912
-    # create a gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    game_server = GameServer(None)
-    rpc.add_GameServicer_to_server(game_server, server)
 
-    print('Starting server. Listening...', port)
-    server.add_insecure_port('[::]:' + str(port))
-    server.start()
-    # Server starts in background (another thread) so keep waiting
-    game_server.run()
+port = 11912
+# create a gRPC server
+server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+game_server = GameServer()
+rpc.add_GameServicer_to_server(game_server, server)
+print('Starting server. Listening...', port)
+server.add_insecure_port('[::]:' + str(port))
+server.start()
+# Server starts in background (another thread) so keep waiting
+game_server.run()
