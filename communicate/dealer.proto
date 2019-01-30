@@ -5,7 +5,7 @@ package Dealer;
 // The greeting service definition.
 service Game {
   // Sends a greeting
-  rpc GameStream (stream DealerRequest) returns (stream DealerReply) {}
+  rpc GameStream (stream DealerRequest) returns (stream DealerRequest) {}
 }
 
 // The request message containing the user's command.
@@ -14,14 +14,14 @@ message DealerRequest {
   string token = 2;
   string identity = 3;
   string command = 4; // this tells what type of job it is, could be info, op, command, script
-  bytes job = 5;  // this is the serialized version of the real job
-  int32 type = 6; // 0 as info and 1 as command
+  int32 giveup = 5;
+  int32 allin = 6;
+  int32 check = 7;
+  int32 callbet = 8;
+  int32 raisebet = 9;
+  int32 amount = 10;
+  int32 pos = 11;
 }
 
-// The response message containing the greetings
-message DealerReply {
-  bool status  = 1;
-  string message = 2;
-  bytes data = 3;
-}
+
 
