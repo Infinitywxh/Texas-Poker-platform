@@ -21,6 +21,7 @@ message DealerRequest {
   int32 raisebet = 9;
   int32 amount = 10;
   int32 pos = 11;
+  int32 type=12;
 }
 
 
