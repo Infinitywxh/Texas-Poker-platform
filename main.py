@@ -1,17 +1,17 @@
 import random
 import os
 from lib.texaspoker import State
-from lib.testcardlevel import test1
-from lib.testcardlevel import test2
-initMoney = 1000
-bigBlind = 20
-totalPlayer = 5
-button = 0
+from lib.texaspoker import initMoney
+from lib.texaspoker import bigBlind
+from lib.texaspoker import totalPlayer
+from lib.texaspoker import button
+
+
 def mainroutine():
     # main routine
     # id of the card: 0-51
     global initMoney
-    global binBlind
+    global bigBlind
     global totalPlayer
     global button
 
@@ -107,6 +107,3 @@ def mainroutine():
 
     # main routine ended
 
-
-# test1()
-# test2()

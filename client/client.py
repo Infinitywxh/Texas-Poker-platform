@@ -14,7 +14,10 @@ import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
 from ubiqtool.thread_jobs import Job
 import time
-import main
+from lib.texaspoker import initMoney
+from lib.texaspoker import bigBlind
+from lib.texaspoker import totalPlayer
+from lib.texaspoker import button
 import AI.naive
 import lib.texaspoker
 
@@ -63,7 +66,7 @@ class Client(object):
         for res in responses:
             # print('client get a response from the handle')
             self._new_response.append(res)
-            if mypos == (res.pos + 1) % main.totalPlayer:
+            if mypos == (res.pos + 1) % totalPlayer:
                 decision = naive.naive_ai(texaspoker.state)
                 self.add_request(dealer_pb2.DealerRequest(type=1, giveup=decision.giveup,
                     allin=decision.allin, check=decision.check, raisebet=decision.raisebet,

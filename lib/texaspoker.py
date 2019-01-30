@@ -2,10 +2,14 @@ import random
 import os
 from AI.naive import naive_ai
 from time import sleep
-import server
-import main
 import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
+
+initMoney = 1000
+bigBlind = 20
+totalPlayer = 5
+button = 0
+
 
 # alter the id into color
 def id2color(card):
@@ -240,6 +244,10 @@ class Player(object):
 
 
 class State(object):
+    global initMoney
+    global bigBlind
+    global totalPlayer
+    global button
     def __init__(self, totalPlayer, initMoney, bigBlind):
         ''' class to hold the game '''
         self.bigBlind = bigBlind
@@ -291,10 +299,10 @@ class State(object):
         return 1
 
     def nextpos(self, pos):
-        self.currpos = (pos + 1) % main.totalPlayer
+        self.currpos = (pos + 1) % totalPlayer
         return self.currpos
 
-    def play_round(self, round):
+    def play_round(self, round, request, response):
         checkflag = 0
         while True:
             if self.round_over() == 1:
@@ -308,9 +316,9 @@ class State(object):
             decision = Decision()
             # TODO   send state and player info to player[state.currpos]
             # TODO   run player AI
-            while len(server.game_server.request[self.currpos]) == 0:
+            while len(request[self.currpos]) == 0:
                 sleep(1)
-            tmp = server.game_server.request[self.currpos].pop()
+            tmp = request[self.currpos].pop()
             decision.update([tmp.giveup, tmp.allin, tmp.check, tmp.callbet, tmp.raisebet, tmp.amount])
             # TODO   receive decision from player, decision = (give-up, allin, check, callbet, raisebet, amount)
 
@@ -321,7 +329,7 @@ class State(object):
                 print("## player %s giveup" % self.currpos)
             elif round != 0 and decision.check == 1:
                 if checkflag == 1:
-                    illegalmove(self.currpos)
+                    self.illegalmove()
                     continue
                 print("## player %s check" % self.currpos)
                 continue
@@ -338,7 +346,7 @@ class State(object):
                 delta = self.minbet - self.player[self.currpos].bet
                 assert delta > 0
                 if delta >= self.player[self.currpos].money or delta < 0:
-                    illegalmove(self.currpos)
+                    self.illegalmove()
                     continue
                 self.player[self.currpos].raisebet(delta)
                 self.moneypot += delta
@@ -348,13 +356,13 @@ class State(object):
             elif decision.raisebet == 1:
                 assert decision.amount >= self.minbet
                 if decision.amount - self.minbet < self.last_raised:
-                    illegalmove(self.currpos)
+                    self.illegalmove()
                     continue
                 self.last_raised = decision.amount - self.minbet
                 self.minbet = decision.amount
                 delta = decision.amount - self.player[self.currpos].bet
                 if delta >= self.player[self.currpos].money or delta < 0:
-                    illegalmove(self.currpos)
+                    self.illegalmove()
                     continue
                 self.player[self.currpos].raisebet(delta)
                 self.moneypot += delta
@@ -362,11 +370,11 @@ class State(object):
                 print("## player %s raisebet: %s" % (self.currpos, delta))
 
             else:
-                illegalmove(self.currpos)
+                self.illegalmove()
                 continue
 
-            for i in range(main.totalplayer):
-                server.response[i].append(rpc.DealerRequest(giveup=decision.giveup,
+            for i in range(totalPlayer):
+                response[i].append(rpc.DealerRequest(giveup=decision.giveup,
                 allin=decision.allin, check=decision.check, callbet=decision.callbet,
                 raisebet=decision.raisebet, amount=decision.amount, pos=self.currpos))
 
@@ -386,14 +394,15 @@ class State(object):
                     winpos = pos
         return winpos
 
+    def illegalmove(self):  # player进行非法行动的处理
+        # TODO  send infomation to the player: illegal decision!
+        self.player[self.currpos].active = False
+        self.playernum -= 1
+        self.currpos = self.nextpos(self.currpos)
+        print('player %s illegal move' % self.currpos)
 
 
-def illegalmove(playerid):
-    # TODO  send infomation to the player: illegal decision!
-    player[playerid].active = False
-    state.playernum -= 1
-    state.currpos = nextpos(state.currpos)
-    print('player %s illegal move' % playerid)
+
 
 class Decision(object):
     giveup = 0
