@@ -2,7 +2,7 @@ from lib.texaspoker import Hand
 from lib.texaspoker import id2color
 from lib.texaspoker import id2num
 import random
-# 测试：计算牌面 level
+
 
 def test1():
     A = [0] * 7
