@@ -14,9 +14,13 @@ import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
 from ubiqtool.thread_jobs import Job
 import time
+import main
+import AI.naive
+import lib.texaspoker
 
 address = 'localhost'
 port = 11912
+
 
 
 class Client(object):
@@ -44,18 +48,26 @@ class Client(object):
                 yield msg
 
     def run(self):
-        """this is where you shall work"""
+
         while True:
             self.add_request(Client.HeartBeat())
+            print(len(self._new_request))
             time.sleep(1)
 
     def start(self):
         """
         """
+        # print('start in client begin')
         responses = self.conn.GameStream(self.chat_with_server())
+        # print('reponses recieved by the client')
         for res in responses:
+            # print('client get a response from the handle')
             self._new_response.append(res)
-            print('response ->', res)
+            if mypos == (res.pos + 1) % main.totalPlayer:
+                decision = naive.naive_ai(texaspoker.state)
+                self.add_request(dealer_pb2.DealerRequest(type=1, giveup=decision.giveup,
+                    allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
+                    callbet=decision.callbet, amount=decision.amount))
 
     def add_request(self, msg):
         self._lock.acquire()
@@ -64,9 +76,12 @@ class Client(object):
 
     @staticmethod
     def HeartBeat():
-        return dealer_pb2.DealerRequest(command='heartbeat')
+        return dealer_pb2.DealerRequest(command='heartbeat', type=0)
 
 if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print('Error: enter the pos')
+    mypos = sys.argv[1]
     username = 'bfan'
     c = Client(username, None)
     Job(c).start()
