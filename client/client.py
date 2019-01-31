@@ -43,9 +43,9 @@ class Client(object):
     def chat_with_server(self):
         while True:
             if len(self._new_request) != 0:
-                self._lock.acquire()
+                # self._lock.acquire()
                 msg = self._new_request.pop(0)
-                self._lock.release()
+                # self._lock.release()
                 yield msg
 
     def run(self):
@@ -63,28 +63,32 @@ class Client(object):
         responses = self.conn.GameStream(self.chat_with_server())
         print('reponses recieved by the client')
         for res in responses:
+            # self._lock.acquire()
             self._new_response.append(res)
+            # self._lock.release()
             if res.type == 1:
-                print('received a valid response')
+                print('received a valid response, res:')
                 print(res)
             else:
                 print('receiced a empty response')
             if res.type == 1 and mypos == (res.pos + 1) % totalPlayer:
                 print('client give a decision')
                 decision = naive_ai(mypos, server.state)
+                # self._lock.acquire()
                 self.add_request(dealer_pb2.DealerRequest(giveup=decision.giveup,
                 allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
                 callbet=decision.callbet, amount=decision.amount, pos=mypos, type=1))
+                # self._lock.release()
             
     def add_request(self, msg):
-        self._lock.acquire()
+        # self._lock.acquire()
         self._new_request.append(msg)
-        self._lock.release()
+        # self._lock.release()
 
     @staticmethod
     def HeartBeat():
-        return dealer_pb2.DealerRequest(command='heartbeat', type=0)
-
+        global mypos
+        return dealer_pb2.DealerRequest(command='heartbeat', type=0, pos=mypos)
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('Error: enter the pos')

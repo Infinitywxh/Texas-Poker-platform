@@ -1,3 +1,8 @@
+﻿目前的问题：
+程序有时会在停下来一直wait某个player，玩家越多崩溃率越高（最新版本中两个玩家可以基本不崩溃）；
+lib细节有问题，assertion有时会failed
+
+
 可修改的参数为：
 initMoney 初始钱数
 bigBlind 大盲注

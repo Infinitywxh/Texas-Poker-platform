@@ -33,9 +33,11 @@ class GameServer(rpc.GameServicer):
         """
         lastindex = 0
         # For every client a infinite loop starts (in gRPC's own managed thread)
-        # print('a loop in server')
+        print('GameServer called')
         # Check if there are any new messages
         for item in request_iterator:
+            # print('lenth of 0,1:', len(self.response[0]), len(self.response[1]))
+            # print('itempos:', item.pos)
             if item.type == 1:
                 print('server received a status request')
                 print('positon:',item.pos)
