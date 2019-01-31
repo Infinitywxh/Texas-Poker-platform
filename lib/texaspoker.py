@@ -345,7 +345,7 @@ class State(object):
 
             elif decision.callbet == 1:
                 delta = self.minbet - self.player[self.currpos].bet
-                assert delta > 0
+                assert delta >= 0
                 if delta >= self.player[self.currpos].money or delta < 0:
                     self.illegalmove()
                     continue
@@ -377,7 +377,7 @@ class State(object):
             for i in range(totalPlayer):
                 response[i].append(dealer_pb2.DealerRequest(giveup=decision.giveup,
                 allin=decision.allin, check=decision.check, callbet=decision.callbet,
-                raisebet=decision.raisebet, amount=decision.amount, pos=self.currpos))
+                raisebet=decision.raisebet, amount=decision.amount, pos=self.currpos, type=1))
 
             print(self)
             print(self.player[self.currpos])

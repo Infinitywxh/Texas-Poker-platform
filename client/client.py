@@ -43,10 +43,8 @@ class Client(object):
     def chat_with_server(self):
         while True:
             if len(self._new_request) != 0:
-                print('chat called')
                 self._lock.acquire()
                 msg = self._new_request.pop(0)
-                print('request->', msg)
                 self._lock.release()
                 yield msg
 
@@ -54,7 +52,6 @@ class Client(object):
 
         while True:
             self.add_request(Client.HeartBeat())
-            print(len(self._new_request))
             time.sleep(1)
 
     def start(self):
@@ -66,14 +63,18 @@ class Client(object):
         responses = self.conn.GameStream(self.chat_with_server())
         print('reponses recieved by the client')
         for res in responses:
-            print('client get a response from the handle')
             self._new_response.append(res)
-            if mypos == (res.pos + 1) % totalPlayer:
+            if res.type == 1:
+                print('received a valid response')
+                print(res)
+            else:
+                print('receiced a empty response')
+            if res.type == 1 and mypos == (res.pos + 1) % totalPlayer:
                 print('client give a decision')
                 decision = naive_ai(mypos, server.state)
-                self.add_request(dealer_pb2.DealerRequest(type=1, giveup=decision.giveup,
+                self.add_request(dealer_pb2.DealerRequest(giveup=decision.giveup,
                 allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
-                callbet=decision.callbet, amount=decision.amount, pos=mypos))
+                callbet=decision.callbet, amount=decision.amount, pos=mypos, type=1))
             
     def add_request(self, msg):
         self._lock.acquire()

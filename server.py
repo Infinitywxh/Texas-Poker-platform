@@ -33,17 +33,14 @@ class GameServer(rpc.GameServicer):
         """
         lastindex = 0
         # For every client a infinite loop starts (in gRPC's own managed thread)
-        print('gamestream called')
-        # while True:
-            # print('a loop in server')
-            # Check if there are any new messages
+        # print('a loop in server')
+        # Check if there are any new messages
         for item in request_iterator:
-            print('server received a request')
             if item.type == 1:
                 print('server received a status request')
                 print('positon:',item.pos)
                 self.request[item.pos].append(item)
-            while len(self.response[item.pos]) != 0:
+            if len(self.response[item.pos]) != 0:
                 print('server yield a response')
                 yield self.response[item.pos].pop()
 
@@ -81,7 +78,7 @@ class GameServer(rpc.GameServicer):
         for i in range(totalPlayer):
             self.response[i].append(dealer_pb2.DealerRequest(giveup=0,
                             allin=0, check=0, callbet=0,
-                            raisebet=1, amount=bigBlind, pos=state.currpos))
+                            raisebet=1, amount=bigBlind, pos=state.currpos, type=1))
 
         state.play_round(0, self.request, self.response)
 
@@ -145,7 +142,7 @@ class GameServer(rpc.GameServicer):
 
     @staticmethod
     def void_reply():
-        return dealer_pb2.DealerRequest(command='void')
+        return dealer_pb2.DealerRequest(type=0)
 
 
 if __name__ == '__main__':
