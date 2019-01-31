@@ -7,7 +7,7 @@ import communicate.dealer_pb2_grpc as rpc
 
 initMoney = 1000
 bigBlind = 20
-totalPlayer = 5
+totalPlayer = 2 
 button = 0
 
 
@@ -317,6 +317,7 @@ class State(object):
             # TODO   send state and player info to player[state.currpos]
             # TODO   run player AI
             while len(request[self.currpos]) == 0:
+                print('waiting for position ', self.currpos)
                 sleep(1)
             tmp = request[self.currpos].pop()
             decision.update([tmp.giveup, tmp.allin, tmp.check, tmp.callbet, tmp.raisebet, tmp.amount])
@@ -374,7 +375,7 @@ class State(object):
                 continue
 
             for i in range(totalPlayer):
-                response[i].append(rpc.DealerRequest(giveup=decision.giveup,
+                response[i].append(dealer_pb2.DealerRequest(giveup=decision.giveup,
                 allin=decision.allin, check=decision.check, callbet=decision.callbet,
                 raisebet=decision.raisebet, amount=decision.amount, pos=self.currpos))
 

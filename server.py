@@ -11,6 +11,8 @@ from lib.texaspoker import initMoney
 from lib.texaspoker import bigBlind
 from lib.texaspoker import totalPlayer
 from lib.texaspoker import button
+global state
+state = State(totalPlayer, initMoney, bigBlind)
 class GameServer(rpc.GameServicer):
 
     def __init__(self):
@@ -31,24 +33,27 @@ class GameServer(rpc.GameServicer):
         """
         lastindex = 0
         # For every client a infinite loop starts (in gRPC's own managed thread)
-        # print('gamestream called')
+        print('gamestream called')
         # while True:
             # print('a loop in server')
             # Check if there are any new messages
         for item in request_iterator:
-            # print('server received a requeset')
+            print('server received a request')
             if item.type == 1:
-                self.request.append(item)
-            while len(self.response) != 0:
-                yield self.response.pop()
+                print('server received a status request')
+                print('positon:',item.pos)
+                self.request[item.pos].append(item)
+            while len(self.response[item.pos]) != 0:
+                print('server yield a response')
+                yield self.response[item.pos].pop()
 
     def run(self):
         global initMoney
         global bigBlind
         global totalPlayer
         global button
-
-        state = State(totalPlayer, initMoney, bigBlind)
+        global state
+        
 
         # shuffle the cards
         cardHeap = list(range(0, 52))
@@ -70,9 +75,13 @@ class GameServer(rpc.GameServicer):
         state.player[state.currpos].raisebet(bigBlind)
         state.moneypot += bigBlind
 
+        print("## player %s bigBlind: %s" % (state.currpos, bigBlind))
         print(state)
         print(state.player[state.currpos])
-        print("## player %s bigBlind: %s" % (state.currpos, bigBlind))
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(giveup=0,
+                            allin=0, check=0, callbet=0,
+                            raisebet=1, amount=bigBlind, pos=state.currpos))
 
         state.play_round(0, self.request, self.response)
 
@@ -139,14 +148,14 @@ class GameServer(rpc.GameServicer):
         return dealer_pb2.DealerRequest(command='void')
 
 
-
-port = 11912
-# create a gRPC server
-server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-game_server = GameServer()
-rpc.add_GameServicer_to_server(game_server, server)
-print('Starting server. Listening...', port)
-server.add_insecure_port('[::]:' + str(port))
-server.start()
-# Server starts in background (another thread) so keep waiting
-game_server.run()
+if __name__ == '__main__':
+    port = 11912
+    # create a gRPC server
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    game_server = GameServer()
+    rpc.add_GameServicer_to_server(game_server, server)
+    print('Starting server. Listening...', port)
+    server.add_insecure_port('[::]:' + str(port))
+    server.start()
+    # Server starts in background (another thread) so keep waiting
+    game_server.run()

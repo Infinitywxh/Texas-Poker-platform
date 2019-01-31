@@ -18,9 +18,8 @@ from lib.texaspoker import initMoney
 from lib.texaspoker import bigBlind
 from lib.texaspoker import totalPlayer
 from lib.texaspoker import button
-import AI.naive
-import lib.texaspoker
-
+from AI.naive import naive_ai
+import server
 address = 'localhost'
 port = 11912
 
@@ -44,6 +43,7 @@ class Client(object):
     def chat_with_server(self):
         while True:
             if len(self._new_request) != 0:
+                print('chat called')
                 self._lock.acquire()
                 msg = self._new_request.pop(0)
                 print('request->', msg)
@@ -60,18 +60,21 @@ class Client(object):
     def start(self):
         """
         """
+        global mypos
+        print('player position = ', mypos)
         # print('start in client begin')
         responses = self.conn.GameStream(self.chat_with_server())
-        # print('reponses recieved by the client')
+        print('reponses recieved by the client')
         for res in responses:
-            # print('client get a response from the handle')
+            print('client get a response from the handle')
             self._new_response.append(res)
             if mypos == (res.pos + 1) % totalPlayer:
-                decision = naive.naive_ai(texaspoker.state)
+                print('client give a decision')
+                decision = naive_ai(mypos, server.state)
                 self.add_request(dealer_pb2.DealerRequest(type=1, giveup=decision.giveup,
-                    allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
-                    callbet=decision.callbet, amount=decision.amount))
-
+                allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
+                callbet=decision.callbet, amount=decision.amount, pos=mypos))
+            
     def add_request(self, msg):
         self._lock.acquire()
         self._new_request.append(msg)
@@ -84,7 +87,7 @@ class Client(object):
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('Error: enter the pos')
-    mypos = sys.argv[1]
+    mypos = int(sys.argv[1])
     username = 'bfan'
     c = Client(username, None)
     Job(c).start()
