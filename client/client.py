@@ -58,21 +58,19 @@ class Client(object):
         """
         """
         global mypos
-        print('player position = ', mypos)
+        # print('player position = ', mypos)
         # print('start in client begin')
         responses = self.conn.GameStream(self.chat_with_server())
-        print('reponses recieved by the client')
+        # print('reponses recieved by the client', mypos)
         for res in responses:
             # self._lock.acquire()
             self._new_response.append(res)
             # self._lock.release()
-            if res.type == 1:
-                print('received a valid response, res:')
-                print(res)
-            else:
-                print('receiced a empty response')
-            if res.type == 1 and mypos == (res.pos + 1) % totalPlayer:
-                print('client give a decision')
+            if res.type == 2:
+                print('client side state and player:')
+                print(server.state)
+                print(server.state.player[mypos])
+                # print('client give a decision, position', mypos)
                 decision = naive_ai(mypos, server.state)
                 # self._lock.acquire()
                 self.add_request(dealer_pb2.DealerRequest(giveup=decision.giveup,

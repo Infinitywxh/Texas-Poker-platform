@@ -11,10 +11,12 @@ from lib.texaspoker import initMoney
 from lib.texaspoker import bigBlind
 from lib.texaspoker import totalPlayer
 from lib.texaspoker import button
+global test
+test = 0
 global state
 state = State(totalPlayer, initMoney, bigBlind)
 class GameServer(rpc.GameServicer):
-
+    global state
     def __init__(self):
         # List with all the chat history
 
@@ -23,27 +25,17 @@ class GameServer(rpc.GameServicer):
 
     # The stream which will be used to send new messages to clients
     def GameStream(self, request_iterator, context):
-        """
-        This is a response-stream type call. This means the server can keep sending messages
-        Every client opens this connection and waits for server to send new messages
-
-        :param request_iterator:
-        :param context:
-        :return:
-        """
-        lastindex = 0
-        # For every client a infinite loop starts (in gRPC's own managed thread)
-        print('GameServer called')
+        # print('GameServer called')
         # Check if there are any new messages
         for item in request_iterator:
-            # print('lenth of 0,1:', len(self.response[0]), len(self.response[1]))
+            # print('length of request:', len(self.request[0]), len(self.request[1]), len(self.request[2]))
             # print('itempos:', item.pos)
             if item.type == 1:
-                print('server received a status request')
-                print('positon:',item.pos)
+                # print('server received a status request from position', item.pos)
                 self.request[item.pos].append(item)
+                # print('length of request after receive:', len(self.request[0]), len(self.request[1]), len(self.request[2]))
             if len(self.response[item.pos]) != 0:
-                print('server yield a response')
+                # print('server yield a response for position', item.pos)
                 yield self.response[item.pos].pop()
 
     def run(self):
