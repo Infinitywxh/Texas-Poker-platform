@@ -1,6 +1,17 @@
-﻿目前的问题：
-程序有时会在停下来一直wait某个player，玩家越多崩溃率越高（最新版本中两个玩家可以基本不崩溃）；
-lib细节有问题，assertion有时会failed
+程序运行方法：
+（目前是3玩家模式，玩家人数在texaspoker中修改totalplayer）
+
+make
+
+/opt/anaconda3/bin/python server.py
+/opt/anaconda3/bin/python client.py 0
+/opt/anaconda3/bin/python client.py 1
+/opt/anaconda3/bin/python client.py 2
+
+（client后面的数字给其位置赋值）
+
+目前的问题：
+server中对state的修改不能体现在client.state的引用中，导致数据出错（assertion failed）
 
 
 可修改的参数为：
