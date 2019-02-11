@@ -13,6 +13,9 @@ class Decision(object):
     def clear(self):
         self.giveup = self.allin = self.check = self.callbet = self.raisebet = self.amount = 0
 
+    def __str__(self):
+        return 'giveup=%s, allin=%s, check=%s, callbet=%s, raisebet=%s, amount=%s' % (self.giveup,self.allin,self.check,
+                                                                                                    self.callbet, self.raisebet, self.amount)
 
 
 def naive_ai(id, state):

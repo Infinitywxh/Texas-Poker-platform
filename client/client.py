@@ -19,10 +19,11 @@ from lib.texaspoker import bigBlind
 from lib.texaspoker import totalPlayer
 from lib.texaspoker import button
 from AI.naive import naive_ai
-import server
+from lib.texaspoker import State
+from lib.texaspoker import Player
 address = 'localhost'
 port = 11912
-
+state = State(totalPlayer, initMoney, bigBlind)
 
 
 class Client(object):
@@ -35,8 +36,7 @@ class Client(object):
         self.conn = rpc.GameStub(channel)
         self.ai = AI
         self._lock = threading.Lock()
-        self._response_so_far = []
-        self._request_so_far = []
+        self._decision_so_far = []
         self._new_response = []
         self._new_request = []
 
@@ -58,6 +58,7 @@ class Client(object):
         """
         """
         global mypos
+        global state
         # print('player position = ', mypos)
         # print('start in client begin')
         responses = self.conn.GameStream(self.chat_with_server())
@@ -67,17 +68,65 @@ class Client(object):
             self._new_response.append(res)
             # self._lock.release()
             if res.type == 2:
-                print('client side state and player:')
-                print(server.state)
-                print(server.state.player[mypos])
-                # print('client give a decision, position', mypos)
-                decision = naive_ai(mypos, server.state)
-                # self._lock.acquire()
-                self.add_request(dealer_pb2.DealerRequest(giveup=decision.giveup,
-                allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
-                callbet=decision.callbet, amount=decision.amount, pos=mypos, type=1))
-                # self._lock.release()
-            
+                state.pos = res.pos
+                if res.pos == mypos:
+                    decision = naive_ai(mypos, state)
+                    print('$$$ client made a decision:')
+                    print(decision)
+                    # self._lock.acquire()
+                    self.add_request(dealer_pb2.DealerRequest(giveup=decision.giveup,
+                    allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
+                    callbet=decision.callbet, amount=decision.amount, pos=mypos, type=1))
+                    # self._lock.release()
+
+            elif res.type == 1:
+                print('client received a decision info from the server')
+                print('$$$ giveup,check,allin,callbet,raisebet,amount,pos:',res.giveup,res.check,res.allin,res.callbet,res.raisebet,res.amount, res.pos)
+                state.currpos = res.pos
+                
+                # update state
+                if res.giveup == 1:
+                    state.player[state.currpos].active = False
+                    state.playernum -= 1
+                elif res.check == 1:
+                    pass
+                elif res.allin == 1:
+                    state.moneypot += state.player[state.currpos].money
+                    state.player[state.currpos].allinbet()
+                    if state.player[state.currpos].bet > state.minbet:
+                        state.last_raised = state.player[state.currpos].bet - state.minbet
+                        state.minbet = state.player[state.currpos].bet
+                elif res.callbet == 1:
+                    delta = state.minbet - state.player[state.currpos].bet
+                    state.player[state.currpos].raisebet(delta)
+                    state.moneypot += delta
+                    checkflag = 1
+
+                elif res.raisebet == 1:
+                    state.last_raised = res.amount - state.minbet
+                    state.minbet = res.amount
+                    delta = res.amount - state.player[state.currpos].bet
+                    state.player[state.currpos].raisebet(delta)
+                    state.moneypot += delta
+
+                else:
+                    print('impossible')
+
+                # print('##### after modify, state and player:')
+                # print(state)
+                # print(state.player[mypos])
+                self._decision_so_far.append(res)
+
+            elif res.type == 3:
+                if res.command == 'restore':
+                    if res.pos == 1:
+                        state.restore(res.pos, button, bigBlind)
+                    else:
+                        state.restore(res.pos, button, 0)
+                elif res.command == 'update':
+                    state.update(totalPlayer)
+                elif res.command == 'givecard':
+                    state.player[res.pos].cards.append(res.num)
     def add_request(self, msg):
         # self._lock.acquire()
         self._new_request.append(msg)
@@ -91,6 +140,15 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('Error: enter the pos')
     mypos = int(sys.argv[1])
+
+    # small and big Blind, modify the state
+    state.nextpos(button)
+    state.player[state.currpos].raisebet(bigBlind // 2)
+    state.moneypot += bigBlind // 2
+    state.nextpos(state.currpos)
+    state.player[state.currpos].raisebet(bigBlind)
+    state.moneypot += bigBlind
+
     username = 'bfan'
     c = Client(username, None)
     Job(c).start()

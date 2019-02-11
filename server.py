@@ -34,9 +34,9 @@ class GameServer(rpc.GameServicer):
                 # print('server received a status request from position', item.pos)
                 self.request[item.pos].append(item)
                 # print('length of request after receive:', len(self.request[0]), len(self.request[1]), len(self.request[2]))
-            if len(self.response[item.pos]) != 0:
+            while len(self.response[item.pos]) != 0:
                 # print('server yield a response for position', item.pos)
-                yield self.response[item.pos].pop()
+                yield self.response[item.pos].pop(0)
 
     def run(self):
         global initMoney
@@ -78,39 +78,71 @@ class GameServer(rpc.GameServicer):
 
         # pre-flop ended
         state.update(totalPlayer)
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='update'))
         state.sharedcards = cardHeap[0:3]
 
+        heappos = 3
         # flop begin
         print('$$$ flop begin')
 
         state.restore(1, button, bigBlind)
-
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='restore', pos=1))
         state.play_round(1, self.request, self.response)
+
 
         # flop ended
         state.update(totalPlayer)
-        state.sharedcards = cardHeap[0:4]
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='update'))
+
+        for i in range(totalPlayer):
+            if state.player[i].active == False:
+                continue
+            state.player[i].cards.append(cardHeap[heappos])
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='givecard', pos=i, num=cardHeap[heappos]))
+            heappos += 1
+
 
         # turn begin
         print('$$$ turn begin')
 
-        state.restore(2, button, bigBlind)
+        state.restore(2, button, 0)
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='restore', pos=2))
 
         state.play_round(2, self.request, self.response)
 
         # turn ended
         state.update(totalPlayer)
-        state.sharedcards = cardHeap[0:5]
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='update'))
+
+        for x in state.player:
+            x.cards.append(cardHeap[heappos])
+            heappos += 1
+        for i in range(totalPlayer):
+            if state.player[i].active == False:
+                continue
+            state.player[i].cards.append(cardHeap[heappos])
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='givecard', pos=i, num=cardHeap[heappos]))
+            heappos += 1
+
 
         # river begin
         print('$$$ river begin')
 
-        state.restore(3, button, bigBlind)
+        state.restore(3, button, 0)
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='restore', pos=3))
 
         state.play_round(3, self.request, self.response)
 
         # river ended
         state.update(totalPlayer)
+        for i in range(totalPlayer):
+            self.response[i].append(dealer_pb2.DealerRequest(type=3, command='update'))
 
         print("game ended")
 

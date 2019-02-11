@@ -1,5 +1,5 @@
 程序运行方法：
-（目前是3玩家模式，玩家人数在texaspoker中修改totalplayer）
+（目前是4玩家模式，可在linux上正常运行；在texaspoker中修改totalplayer可改变玩家人数）
 
 make
 
@@ -7,11 +7,9 @@ make
 /opt/anaconda3/bin/python client.py 0
 /opt/anaconda3/bin/python client.py 1
 /opt/anaconda3/bin/python client.py 2
+/opt/anaconda3/bin/python client.py 3
 
-（client后面的数字给其位置赋值）
-
-目前的问题：
-server中对state的修改不能体现在client.state的引用中，导致数据出错（assertion failed）
+（client后面的数字是玩家位置）
 
 
 可修改的参数为：
