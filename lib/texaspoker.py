@@ -7,7 +7,7 @@ import communicate.dealer_pb2_grpc as rpc
 
 initMoney = 1000
 bigBlind = 20
-totalPlayer = 4
+totalPlayer = 3
 button = 0
 
 
@@ -302,7 +302,7 @@ class State(object):
         self.currpos = (pos + 1) % totalPlayer
         return self.currpos
 
-    def play_round(self, round, request, response):
+    def play_round(self, round, request, response, response_so_far):
         checkflag = 0
         while True:
             if self.round_over() == 1:
@@ -377,9 +377,11 @@ class State(object):
                 continue
 
             for i in range(totalPlayer):
-                response[i].append(dealer_pb2.DealerRequest(giveup=decision.giveup,
+                t = dealer_pb2.DealerRequest(giveup=decision.giveup,
                 allin=decision.allin, check=decision.check, callbet=decision.callbet,
-                raisebet=decision.raisebet, amount=decision.amount, pos=self.currpos, type=1))
+                raisebet=decision.raisebet, amount=decision.amount, pos=self.currpos, type=1)
+                response[i].append(t)
+                response_so_far[i].append(t)
 
             print(self)
             print(self.player[self.currpos])

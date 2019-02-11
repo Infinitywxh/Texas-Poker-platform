@@ -23,11 +23,11 @@ def naive_ai(id, state):
     decision = Decision()
     decision.clear()
     if delta <= 0:  # 还在看牌期，之前无人下注
-        if state.player[id].money < state.bigBlind:
-            flag = random.randint(1, 5)
-            if flag == 1:
+        if state.player[id].money < state.bigBlind: # 钱数不够大盲注
+            flag = random.randint(1, 3)
+            if flag == 1:   # 弃牌
                 decision.giveup = 1
-            else:
+            else:           # allin
                 decision.allin = 1
         elif state.player[id].money == state.bigBlind:
             decision.allin = 1
@@ -35,7 +35,7 @@ def naive_ai(id, state):
             decision.raisebet = 1
             decision.amount = state.bigBlind
     elif state.player[id].money <= delta:      # 手中的钱不够补全或正好补全
-        flag = random.randint(1, 5)
+        flag = random.randint(1, 3)
         if flag == 1:
             decision.giveup = 1
         else:
@@ -49,7 +49,12 @@ def naive_ai(id, state):
                 decision.callbet = 1
             else:
                 decision.raisebet = 1
-                decision.amount = random.randint(state.minbet + state.last_raised, state.player[id].bet+ state.player[id].money - 1)
+                low = state.minbet + state.last_raised
+                high = state.player[id].bet+ state.player[id].money - 1
+                t1 = random.randint(low, high)
+                t2 = random.randint(low, t1)
+                decision.amount = random.randint(low, t2)
+
 
         else:
             decision.callbet = 1

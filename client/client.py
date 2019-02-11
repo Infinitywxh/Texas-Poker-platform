@@ -59,17 +59,25 @@ class Client(object):
         """
         global mypos
         global state
+
         # print('player position = ', mypos)
         # print('start in client begin')
         responses = self.conn.GameStream(self.chat_with_server())
         # print('reponses recieved by the client', mypos)
         for res in responses:
             # self._lock.acquire()
+
             self._new_response.append(res)
             # self._lock.release()
             if res.type == 2:
-                state.pos = res.pos
+
+                state.currpos = res.pos
                 if res.pos == mypos:
+
+                    print('##### before decision, state and player:')
+                    print(state)
+                    print(state.player[mypos])
+                   
                     decision = naive_ai(mypos, state)
                     print('$$$ client made a decision:')
                     print(decision)
@@ -83,7 +91,7 @@ class Client(object):
                 print('client received a decision info from the server')
                 print('$$$ giveup,check,allin,callbet,raisebet,amount,pos:',res.giveup,res.check,res.allin,res.callbet,res.raisebet,res.amount, res.pos)
                 state.currpos = res.pos
-                
+                self._decision_so_far.append(res)
                 # update state
                 if res.giveup == 1:
                     state.player[state.currpos].active = False
@@ -127,6 +135,10 @@ class Client(object):
                     state.update(totalPlayer)
                 elif res.command == 'givecard':
                     state.player[res.pos].cards.append(res.num)
+                elif res.command == 'sharedcard':
+                    state.sharedcards.append(res.num)
+            elif res.type == 5:
+                return
     def add_request(self, msg):
         # self._lock.acquire()
         self._new_request.append(msg)
@@ -140,6 +152,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('Error: enter the pos')
     mypos = int(sys.argv[1])
+    state.last_raised = bigBlind
 
     # small and big Blind, modify the state
     state.nextpos(button)
