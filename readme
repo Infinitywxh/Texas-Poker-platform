@@ -1,13 +1,16 @@
 程序运行方法：
 （目前是4玩家模式，可在linux上正常运行；在texaspoker中修改totalplayer可改变玩家人数）
 
+对于n玩家情况：
+
 make
 
+(以下命令在n个不同终端)
 /opt/anaconda3/bin/python server.py
 /opt/anaconda3/bin/python client.py 0
 /opt/anaconda3/bin/python client.py 1
-/opt/anaconda3/bin/python client.py 2
-/opt/anaconda3/bin/python client.py 3
+……
+/opt/anaconda3/bin/python client.py n-1
 
 （client后面的数字是玩家位置）
 
@@ -23,3 +26,14 @@ naive-ai：在合法情况下随机选择放弃、跟注或加注
 输出：
 每个玩家行动后，会输出其行动的内容，以及行动后该玩家的状态以及局面的状态
 游戏结束后，会输出所有玩家的钱数
+
+server-client原理：
+client维护两个队列：request和response。每隔1s，client的run线程向request队列
+压入一个heartbeat询问信息。client的start线程通过chat_with_server句柄向server
+传递request，并得到server的GameStream的回应句柄。
+server为每个client维护两个队列：request和response。每当client调用GameStream
+句柄时，server从client的request句柄（chat_with_server）获得一个request，并
+返回response队列的一个元素。
+
+当server需要向client传递信息或获取信息时(比如一个决策)，server将相关内容压入其response队列。
+当client收到相关内容，需要向server返回信息时，client将相关信息压入其request队列。

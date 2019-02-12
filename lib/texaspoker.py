@@ -5,10 +5,7 @@ from time import sleep
 import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
 
-initMoney = 1000
-bigBlind = 20
-totalPlayer = 3
-button = 0
+
 
 
 # alter the id into color
@@ -244,13 +241,11 @@ class Player(object):
 
 
 class State(object):
-    global initMoney
-    global bigBlind
-    global totalPlayer
-    global button
-    def __init__(self, totalPlayer, initMoney, bigBlind):
+    def __init__(self, totalPlayer, initMoney, bigBlind, button):
         ''' class to hold the game '''
+        self.totalPlayer = totalPlayer
         self.bigBlind = bigBlind
+        self.button = button
         self.currpos = 0
         self.playernum = totalPlayer
         self.moneypot = 0
@@ -299,7 +294,7 @@ class State(object):
         return 1
 
     def nextpos(self, pos):
-        self.currpos = (pos + 1) % totalPlayer
+        self.currpos = (pos + 1) % self.totalPlayer
         return self.currpos
 
     def play_round(self, round, request, response, response_so_far):
@@ -315,7 +310,7 @@ class State(object):
 
             decision = Decision()
             # TODO   send state and player info to player[state.currpos]
-            for i in range(totalPlayer):
+            for i in range(self.totalPlayer):
                 response[i].append(dealer_pb2.DealerRequest(pos=self.currpos, type=2))
             # TODO   run player AI
             while len(request[self.currpos]) == 0:
@@ -376,7 +371,7 @@ class State(object):
                 self.illegalmove()
                 continue
 
-            for i in range(totalPlayer):
+            for i in range(self.totalPlayer):
                 t = dealer_pb2.DealerRequest(giveup=decision.giveup,
                 allin=decision.allin, check=decision.check, callbet=decision.callbet,
                 raisebet=decision.raisebet, amount=decision.amount, pos=self.currpos, type=1)
@@ -385,6 +380,7 @@ class State(object):
 
             print(self)
             print(self.player[self.currpos])
+            print('\n')
 
     def findwinner(self):
         winpos = -1

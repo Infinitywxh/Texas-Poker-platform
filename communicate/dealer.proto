@@ -13,7 +13,7 @@ message DealerRequest {
   string user = 1;
   string token = 2;
   string identity = 3;
-  string command = 4; // this tells what type of job it is, could be info, op, command, script
+  string command = 4;
   int32 giveup = 5;
   int32 allin = 6;
   int32 check = 7;
@@ -23,6 +23,7 @@ message DealerRequest {
   int32 pos = 11;
   int32 type = 12;
   int32 num = 13;
+  int32 status = 14;
 }
 
 
