@@ -1,5 +1,7 @@
-程序运行方法：
-（目前是4玩家模式，可在linux上正常运行；在texaspoker中修改totalplayer可改变玩家人数）
+﻿程序运行方法：
+（目前是3玩家模式，可在linux上正常运行；在server中修改totalplayer可改变玩家人数）
+
+支持断线重连：若某一client在中途掉线，可以重新连接，继续游戏
 
 对于n玩家情况：
 
