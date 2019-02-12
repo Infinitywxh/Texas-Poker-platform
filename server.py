@@ -209,16 +209,22 @@ class GameServer(rpc.GameServicer):
         # game over, allocate the money pot
 
         totalmoney = state.moneypot
-
+        print('final player num:', state.playernum)
+        for i in range(totalPlayer):
+            if state.player[i].active == True:
+                print('active:', i)
+        for i in range(totalPlayer):
+            print('player %s totalbet: %s' % ( i, state.player[i].totalbet))
         while state.playernum > 0:
             pos = state.findwinner()
             t = state.player[pos].totalbet
             sum = 0
+            print('winner:',pos)
             for i in range(totalPlayer):
                 sum += min(t, state.player[i].totalbet)
                 state.player[i].totalbet -= min(t, state.player[i].totalbet)
                 if state.player[i].totalbet == 0:
-                    state.player[pos].active = False
+                    state.player[i].active = False
                     state.playernum -= 1
             state.player[pos].money += sum
 

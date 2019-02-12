@@ -270,23 +270,21 @@ class State(object):
 
     def update(self, totalPlayer):                       # update the state after each round
         for i in range(totalPlayer):
-            if self.player[i].active == False:
-                continue
             self.player[i].totalbet += self.player[i].bet
             self.player[i].bet = 0
 
     def round_over(self):
         if self.playernum == 1:
-            for i in range(self.playernum):
+            for i in range(self.totalPlayer):
                 if self.player[i].active == True:
                     print('Only Winner: player %s' % i)
             return 1
-        for i in range(self.playernum):
+        for i in range(self.totalPlayer):
             if self.player[i].active is True and self.player[i].allin == 0:
                 break
         else:
             return 1
-        for i in range(self.playernum):
+        for i in range(self.totalPlayer):
             if self.player[i].active is True and (self.player[i].bet != self.minbet and self.player[i].allin == 0):
                 return 0
         if self.turnNum != 0 and self.minbet == 0:
@@ -309,17 +307,27 @@ class State(object):
                 continue
 
             decision = Decision()
-            # TODO   send state and player info to player[state.currpos]
+            # send state and player info to player[state.currpos]
             for i in range(self.totalPlayer):
                 response[i].append(dealer_pb2.DealerRequest(pos=self.currpos, type=2))
-            # TODO   run player AI
+            # run player AI
+            cnt = 0
+            abort = 0
             while len(request[self.currpos]) == 0:
                 # print('waiting for position ', self.currpos)
+                if cnt >= 15:
+                    print('*******player %s disconnected, abort*******' % self.currpos)
+                    abort = 1
+                    break
+                cnt += 1
                 sleep(1)
-            tmp = request[self.currpos].pop(0)
-            decision.update([tmp.giveup, tmp.allin, tmp.check, tmp.callbet, tmp.raisebet, tmp.amount])
-            # TODO   receive decision from player, decision = (give-up, allin, check, callbet, raisebet, amount)
-
+            if abort == 0:
+                tmp = request[self.currpos].pop(0)
+                decision.update([tmp.giveup, tmp.allin, tmp.check, tmp.callbet, tmp.raisebet, tmp.amount])
+                # receive decision from player, decision = (give-up, allin, check, callbet, raisebet, amount)
+            
+            else:
+                decision.giveup = 1
 
             if decision.giveup == 1:
                 self.player[self.currpos].active = False
@@ -330,7 +338,6 @@ class State(object):
                     self.illegalmove()
                     continue
                 print("## player %s check" % self.currpos)
-                continue
             elif decision.allin == 1:
                 self.moneypot += self.player[self.currpos].money
                 self.player[self.currpos].allinbet()
@@ -384,7 +391,7 @@ class State(object):
 
     def findwinner(self):
         winpos = -1
-        for pos in range(self.playernum):
+        for pos in range(self.totalPlayer):
             if self.player[pos].active == 0:
                 continue
             if winpos == -1:

@@ -42,7 +42,10 @@ def naive_ai(id, state):
             decision.allin = 1
 
     else:
-        # t = random.randint(1, 5)
+        t = random.randint(1, 7)
+        if t == 1:
+            decision.giveup = 1
+            return decision
         if state.player[id].money > delta + state.last_raised:
             flag = random.randint(1, 2)
             if flag == 2:
