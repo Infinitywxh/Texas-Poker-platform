@@ -338,14 +338,16 @@ class State(object):
                     self.illegalmove()
                     continue
                 print("## player %s check" % self.currpos)
+            
             elif decision.allin == 1:
+                t = self.player[self.currpos].money
                 self.moneypot += self.player[self.currpos].money
                 self.player[self.currpos].allinbet()
                 if self.player[self.currpos].bet > self.minbet:
                     self.last_raised = self.player[self.currpos].bet - self.minbet
                     self.minbet = self.player[self.currpos].bet
                 checkflag = 1
-                print("## player %s allin: %s" % (self.currpos, self.player[self.currpos].money))
+                print("## player %s allin: %s" % (self.currpos, t))
 
             elif decision.callbet == 1:
                 delta = self.minbet - self.player[self.currpos].bet

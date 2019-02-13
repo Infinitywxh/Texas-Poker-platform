@@ -19,7 +19,7 @@ from lib.texaspoker import State
 from lib.texaspoker import Player
 
 address = 'localhost'
-port = 15001
+port = 15000
 key = 'NULL'
 step = -1
 initMoney = -1

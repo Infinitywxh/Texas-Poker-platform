@@ -253,7 +253,7 @@ def printcard(num):
     return '%s, %s' %(name[num%4], num//4)
 
 if __name__ == '__main__':
-    port = 15001
+    port = 15000
     # create a gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     game_server = GameServer()
