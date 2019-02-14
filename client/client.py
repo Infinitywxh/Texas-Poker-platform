@@ -15,6 +15,7 @@ import communicate.dealer_pb2_grpc as rpc
 from ubiqtool.thread_jobs import Job
 import time
 from AI.naive import naive_ai
+from AI.v1_1 import v1_ai
 from lib.texaspoker import State
 from lib.texaspoker import Player
 
@@ -86,7 +87,7 @@ class Client(object):
                     print(state)
                     print(state.player[mypos])
                    
-                    decision = naive_ai(mypos, state)
+                    decision = self.ai(mypos, state)
                     print('$$$ client made a decision:')
                     print(decision)
                     # self._lock.acquire()
@@ -203,6 +204,6 @@ if __name__ == '__main__':
 
 
     username = 'bfan'
-    c = Client(username, None)
+    c = Client(username, v1_ai)
     Job(c).start()
     c.start()

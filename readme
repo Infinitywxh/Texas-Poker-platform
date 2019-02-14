@@ -3,6 +3,12 @@
 
 支持断线重连：若某一client在中途掉线，可以重新连接，继续游戏
 
+AI：
+naive-ai：在合法情况下随机选择放弃、跟注或加注
+v1.0，v1.1: 德州扑克AI
+修改client main routine 'c = Client(username, v1_ai)' 中的v1_ai，并修改client开头对应的import模块，
+即可在各版本AI间切换
+
 对于n玩家情况：
 
 make
@@ -17,17 +23,14 @@ make
 （client后面的数字是玩家位置）
 
 
-可修改的参数为：
+
+server中可修改的参数为：
 initMoney 初始钱数
 bigBlind 大盲注
 totalPlayer 玩家人数
 button 庄家位置
 
-naive-ai：在合法情况下随机选择放弃、跟注或加注
 
-输出：
-每个玩家行动后，会输出其行动的内容，以及行动后该玩家的状态以及局面的状态
-游戏结束后，会输出所有玩家的钱数
 
 server-client原理：
 client维护两个队列：request和response。每隔1s，client的run线程向request队列
