@@ -328,6 +328,10 @@ class State(object):
             
             else:
                 decision.giveup = 1
+            
+            if decision.callbet == 1 and self.minbet == 0:
+                decision.callbet = 0
+                decision.check = 1
 
             if decision.giveup == 1:
                 self.player[self.currpos].active = False

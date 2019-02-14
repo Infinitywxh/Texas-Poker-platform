@@ -1,52 +1,114 @@
-'''
-牌面level编号
-    皇家同花顺：10
-    同花顺    ：9
-    四条      ：8
-    葫芦      ：7
-    同花      ：6
-    顺子      ：5
-    三条      ：4
-    两对      ：3
-    一对      ：2
-    高牌      ：1
-'''
-'''
-AI策略
-分为2，5，6，7张牌四种情况
-7张：
-    直接根据牌面level判断
-    level 7+，allin
-    level 在4-6， 跟注，若跟注后低于600，加注到600
-    level = 3 若跟注后超过400，放弃。否则跟注。若跟注后低于400，加注到400
-    level = 2，双A双K 若跟注后超过300，放弃。否则跟注
-    level = 2，不超过双Q 若跟注后超过200，放弃。否则跟注
-    level = 1，直接放弃
+def id2color(card):
+    return card % 4
+def id2num(card):
+    return card // 4
+class Hand(object):
+    def __init__(self, cards):
+        cards = cards[:]
+        self.level = 0
+        self.cnt_num = [0] * 13
+        self.cnt_color = [0] * 4
+        self.cnt_num_eachcolor = [[0 for col in range(13)] for row in range(4)]
+        self.maxnum = -1
+        self.single = []
+        self.pair = []
+        self.tripple = []
+        for x in cards:
+            self.cnt_num[id2num(x)] += 1
+            self.cnt_color[id2color(x)] += 1
+            self.cnt_num_eachcolor[id2color(x)][id2num(x)] += 1
+        for i in range(12, -1, -1):
+            if self.cnt_num[i] == 1:
+                self.single.append(i)
+            elif self.cnt_num[i] == 2:
+                self.pair.append(i)
+            elif self.cnt_num[i] == 3:
+                self.tripple.append(i)
+        self.single.sort(reverse=True)
+        self.pair.sort(reverse=True)
+        self.tripple.sort(reverse=True)
 
-6张：
-    2-    直接放弃
-    2~8   若跟注后超过300，放弃。否则跟注
-    8~20  跟注。若跟注后低于300，加注到300
-    20~40 跟注。若跟注后低于600，加注到600
-    40+   allin
+        for i in range(4):
+            if self.cnt_num_eachcolor[i][8:13].count(1) == 5:
+                self.level = 10
+                return
 
-5张：
-    4-    直接放弃
-    4~10  若跟注后超过300，放弃。否则跟注
-    10~20 跟注。若跟注后低于300，加注到300
-    20~50 跟注。若跟注后低于600，加注到600
-    50+   allin
 
-2张：
-    直接根据牌面判断
-    非对子，最大不超过9：若跟注后超过50，放弃。否则跟注
-    非对子，最大为10-Q：若跟注后超过100，放弃。否则跟注
-    非对子，最大为K-A： 若跟注后超过200，放弃。否则跟注
-    对子，不超过Q：跟注。若跟注后低于200，加注到200
-    双A、双K：跟注。若跟注后低于300，加注到300
-'''
+        for i in range(4):
+            for j in range(7, -1, -1):
+                if self.cnt_num_eachcolor[i][j:j+5].count(1) == 5:
+                    self.level = 9
+                    self.maxnum = j + 4
+                    return
+
+
+        for i in range(12, -1, -1):
+            if self.cnt_num[i] == 4:
+                self.maxnum = i
+                self.level = 8
+                return
+
+
+        tripple = self.cnt_num.count(3)
+        if tripple > 1:
+            self.level = 7
+            return
+        elif tripple > 0:
+            if self.cnt_num.count(2) > 0:
+                self.level = 7
+                return
+
+
+        for i in range(4):
+            if self.cnt_color[i] >=5:
+                if(max(self.cnt_num_eachcolor[i]) > self.maxnum):
+                    self.maxnum = max(self.cnt_num_eachcolor[i])
+                self.level = 6
+        if self.level == 6:
+            return
+
+        for i in range(8, -1, -1):
+            flag = 1
+            for j in range(i, i + 5):
+                if self.cnt_num[j] == 0:
+                    flag = 0
+                    break
+            if flag == 1:
+                self.maxnum = i + 4
+                self.level = 5
+                return
+
+
+        for i in range(12, -1, -1):
+            if self.cnt_num[i] == 3:
+                self.maxnum = i
+                self.level = 4
+                return
+
+
+        if self.cnt_num.count(2) > 1:
+            self.level = 3
+            return
+
+
+        for i in range(12, -1, -1):
+            if self.cnt_num[i] == 2:
+                self.maxnum = i
+                self.level = 2
+                return
+
+
+        if self.cnt_num.count(1) == 7:
+            self.level = 1
+            return
+
+        self.level = -1
+
+    def __str__(self):
+        return 'level = %s' % self.level
+
 import random
-from lib.texaspoker import Hand
+
 
 
 class Decision(object):
@@ -71,7 +133,7 @@ weight = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
 
 def v1_ai(id, state):
     global weight
-    remain_card = range(0, 52)
+    remain_card = list(range(0, 52))
     cards = state.sharedcards + state.player[id].cards
     num = len(cards)
     for x in cards:
