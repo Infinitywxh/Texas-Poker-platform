@@ -1,22 +1,22 @@
+'''
+    AI: v1_1版本
+    详见AI-v1.1_interpretation.txt
+'''
 from lib.texaspoker import State
 from lib.texaspoker import Player
 from lib.texaspoker import Hand
 from lib.texaspoker import Decision
 import random
 
-
-weight = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
-
-
 def v1_ai(id, state):
-    global weight
+    weight = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
     remain_card = list(range(0, 52))
     cards = state.sharedcards + state.player[id].cards
     num = len(cards)
     for x in cards:
         remain_card.pop(remain_card.index(x))
     cnt = [0 for col in range(11)]
-
+    # 模拟发牌1000次
     for i in range(1000):
         heap = remain_card[:]
         mycards = cards[:]
@@ -26,6 +26,8 @@ def v1_ai(id, state):
         hand = Hand(mycards)
         level = hand.level
         cnt[level] += weight[level]
+
+    # sum为评估值
     sum = 0
     for x in cnt:
         sum += x / 1000
@@ -200,9 +202,9 @@ def v1_ai(id, state):
             decision.raisebet = 1
             decision.amount = state.bigBlind
     return decision
+# add_bet: 将本局总注额加到total
 
 def add_bet(state, total):
-    # total: 需要将本局总注额加到total, total不超过1000
     # amount: 本局需要下的总注
     amount = total - state.player[state.currpos].totalbet
     assert(amount > state.player[state.currpos].bet)

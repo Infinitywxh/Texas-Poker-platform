@@ -16,11 +16,15 @@ from ubiqtool.thread_jobs import Job
 import time
 # **************************************modify here to use your own AI! ***************************
 from AI.v1_1 import v1_ai
+# *************************************************************************************************
 from lib.texaspoker import State
 from lib.texaspoker import Player
 
+# **************************************modify here to set address and port ***********************
 address = 'localhost'
 port = 15000
+# *************************************************************************************************
+
 key = 'NULL'
 step = -1
 initMoney = -1
@@ -31,35 +35,30 @@ state = State(totalPlayer, initMoney, bigBlind, button)
 
 class Client(object):
     def __init__(self, u: str, AI):
-        # the frame to put ui components on
         self.username = u
         # create a gRPC channel + stub
         channel = grpc.insecure_channel(address + ':' + str(port))
-        # self.request_iterator = ClientRequester()
         self.conn = rpc.GameStub(channel)
         self.ai = AI
         self._lock = threading.Lock()
-        self._decision_so_far = []
-        self._new_response = []
-        self._new_request = []
+        self._decision_so_far = []  # history of the decision info from the server
+        self._new_response = []     # response list from the server
+        self._new_request = []      # request list waiting to send to the server
 
     def chat_with_server(self):
         while True:
             if len(self._new_request) != 0:
-                # self._lock.acquire()
+                # yield a resquest from the request list to the server
                 msg = self._new_request.pop(0)
-                # self._lock.release()
                 yield msg
 
     def run(self):
-
         while True:
+            # every 1 sec append a request to the list
             self.add_request(Client.HeartBeat())
             time.sleep(1)
 
     def start(self):
-        """
-        """
         global mypos
         global state
         global key
@@ -73,7 +72,7 @@ class Client(object):
         for res in responses:
             self._new_response.append(res)
             if res.type == 2:
-                # asking for a decision from the client
+                # server asking for a decision from the client
                 state.currpos = res.pos
                 if res.pos == mypos:
                     decision = self.ai(mypos, state)
@@ -84,7 +83,7 @@ class Client(object):
                     callbet=decision.callbet, amount=decision.amount, pos=mypos, type=1, token=key))
 
             elif res.type == 1:
-                # sending an info to the client to modify the state
+                # server sending an info to the client to modify the state
                 print('client received a info from the server and modify the state')
                 print('$$$ giveup=',res.giveup,', check=',res.check,', allin=',res.allin,', callbet=',res.allin,', raisebet=',res.raisebet,
                            ', amount=', res.amount, ', pos=', res.pos)
@@ -122,7 +121,7 @@ class Client(object):
                 self._decision_so_far.append(res)
 
             elif res.type == 3:
-                # state control command
+                # server send a state control command
                 if res.command == 'restore':
                     if res.pos == 1:
                         state.restore(res.pos, button, bigBlind)
@@ -177,6 +176,7 @@ class Client(object):
 
     @staticmethod
     def HeartBeat():
+        # a empty message, only to find if there is new info from the server
         global mypos
         global key
         global step

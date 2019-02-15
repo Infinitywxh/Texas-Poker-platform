@@ -3,11 +3,8 @@ from lib.texaspoker import state
 from lib.texaspoker import Decision
 
 
-weight = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
-
-
 def v1_ai(id, state):
-    global weight
+    weight = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
     remain_card = list(range(0, 52))
     cards = state.sharedcards + state.player[id].cards
     num = len(cards)

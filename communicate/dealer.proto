@@ -11,19 +11,19 @@ service Game {
 // The request message containing the user's command.
 message DealerRequest {
   string user = 1;
-  string token = 2;
+  string token = 2;     // secure key
   string identity = 3;
-  string command = 4;
-  int32 giveup = 5;
-  int32 allin = 6;
-  int32 check = 7;
-  int32 callbet = 8;
-  int32 raisebet = 9;
-  int32 amount = 10;
-  int32 pos = 11;
-  int32 type = 12;
+  string command = 4;   //command content
+  int32 giveup = 5;     //in lib.texaspoker: class decision
+  int32 allin = 6;      //in lib.texaspoker: class decision
+  int32 check = 7;      //in lib.texaspoker: class decision
+  int32 callbet = 8;    //in lib.texaspoker: class decision
+  int32 raisebet = 9;   //in lib.texaspoker: class decision
+  int32 amount = 10;    //in lib.texaspoker: class decision
+  int32 pos = 11;       //player position
+  int32 type = 12;      //type of the message
   int32 num = 13;
-  int32 status = 14;
+  int32 status = 14;    //state status
 }
 
 

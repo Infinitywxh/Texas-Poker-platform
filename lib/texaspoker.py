@@ -1,21 +1,34 @@
-import random
 from time import sleep
 import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
 
+# 0 黑桃 1 红桃 2 方片 3 草花
+# 牌的id: 0-51
+'''
+牌面level编号
+    皇家同花顺：10
+    同花顺    ：9
+    四条      ：8
+    葫芦      ：7
+    同花      ：6
+    顺子      ：5
+    三条      ：4
+    两对      ：3
+    一对      ：2
+    高牌      ：1
+'''
 
 
-
-# alter the id into color
+# alter the card id into color
 def id2color(card):
     return card % 4
 
-# alter the id into number
+# alter the card id into number
 def id2num(card):
     return card // 4
 
 
-
+# poker hand of 7 card
 class Hand(object):
     def __init__(self, cards):
         cards = cards[:]
@@ -42,6 +55,7 @@ class Hand(object):
         self.pair.sort(reverse=True)
         self.tripple.sort(reverse=True)
 
+        # calculate the level of the poker hand
         for i in range(4):
             if self.cnt_num_eachcolor[i][8:13].count(1) == 5:
                 self.level = 10
@@ -127,7 +141,7 @@ def cmp(x,y):  # x < y return 1
     elif x == y: return 0
     else: return 1
 
-
+# find the bigger of two poker hand, if cards0 < cards1 then return 1, cards0 > cards1 return -1, else return 0
 def judge_two(cards0, cards1):
     hand0 = Hand(cards0)
     hand1 = Hand(cards1)
@@ -210,20 +224,21 @@ def judge_two(cards0, cards1):
 class Player(object):
 
     def __init__(self, initMoney, state):
-        self.active = True
-        self.money = initMoney
-        self.bet = 0
-        self.cards = []
-        self.allin = 0
-        self.totalbet = 0
-        self.state = state
+        self.active = True      # if the player is active(haven't giveups)
+        self.money = initMoney  # money player has
+        self.bet = 0            # the bet in this round
+        self.cards = []         # private cards
+        self.allin = 0          # if the player has all in
+        self.totalbet = 0       # the bet in total(all round)
+        self.state = state      # state
 
+    # raise the bet by amount
     def raisebet(self, amount):
         self.money -= amount
         self.bet += amount
         assert self.money > 0
 
-
+    # player allin
     def allinbet(self):
         self.bet += self.money
         self.allin = 1
@@ -244,13 +259,13 @@ class State(object):
         self.totalPlayer = totalPlayer
         self.bigBlind = bigBlind
         self.button = button
-        self.currpos = 0
-        self.playernum = totalPlayer
-        self.moneypot = 0
-        self.minbet = bigBlind
+        self.currpos = 0               # current position
+        self.playernum = totalPlayer   # active player number
+        self.moneypot = 0              # money in the pot
+        self.minbet = bigBlind         # minimum bet to call
         self.sharedcards = []
         self.turnNum = 0
-        self.last_raised = bigBlind
+        self.last_raised = bigBlind    # the amount of bet raise last time
         self.player = []
         for i in range(totalPlayer):
             self.player.append(Player(initMoney, self))
@@ -271,6 +286,7 @@ class State(object):
             self.player[i].totalbet += self.player[i].bet
             self.player[i].bet = 0
 
+    # judge if the round is over
     def round_over(self):
         if self.playernum == 1:
             return 1
@@ -286,10 +302,12 @@ class State(object):
             return 0
         return 1
 
+    # calculate the next position
     def nextpos(self, pos):
         self.currpos = (pos + 1) % self.totalPlayer
         return self.currpos
 
+    # play a round
     def play_round(self, round, request, response, response_so_far):
         checkflag = 0
         while True:
@@ -302,12 +320,13 @@ class State(object):
                 continue
 
             decision = Decision()
-
+            # asking the client for the decision
             for i in range(self.totalPlayer):
                 response[i].append(dealer_pb2.DealerRequest(pos=self.currpos, type=2))
 
             cnt = 0
             abort = 0
+            # wait more than 15 sec, abort
             while len(request[self.currpos]) == 0:
                 if cnt >= 15:
                     print('*******player %s disconnected, abort*******' % self.currpos)
@@ -388,6 +407,7 @@ class State(object):
             print(self.player[self.currpos])
             print('\n')
 
+    # find a winner in the active player
     def findwinner(self):
         winpos = -1
         for pos in range(self.totalPlayer):

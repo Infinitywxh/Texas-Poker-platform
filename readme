@@ -23,11 +23,15 @@ $ 程序的配置与运行方法
     在主文件夹下，输入make命令
     linux> make
 
-5.运行server端
+5.设置服务器地址和端口
+    在client中将address修改为server端的地址
+    在server和client中修改port变量来设置端口
+
+6.运行server端
     在主文件夹下，输入命令：
     linux> /opt/anaconda3/bin/python server.py
 
-6.运行各client端
+7.运行各client端
     在client文件夹下，输入命令
     linux > /opt/anaconda3/bin/python client.py n
     其中n为该client的位置编号，取值为0 ~ totalPlayer-1
