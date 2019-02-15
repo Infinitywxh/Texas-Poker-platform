@@ -432,12 +432,12 @@ class State(object):
 
 
 class Decision(object):
-    giveup = 0
-    allin = 0
-    check = 0
-    callbet = 0
-    raisebet = 0
-    amount = 0
+    giveup = 0   # 弃牌
+    allin = 0    # 全押
+    check = 0    # 过牌
+    callbet = 0  # 跟注
+    raisebet = 0 # 加注
+    amount = 0   # 加注到amount
 
     def clear(self):
         self.giveup = self.allin = self.check = self.callbet = self.raisebet = self.amount = 0
