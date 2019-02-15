@@ -28,14 +28,13 @@ def generate_Key():
 class GameServer(rpc.GameServicer):
     global state
     def __init__(self):
-        # List with all the chat history
         self.keys = []
         self.request = [[] for col in range(totalPlayer)]
         self.response = [[] for col in range(totalPlayer)]
         self._response_so_far = [[] for col in range(totalPlayer)]
         for i in range(totalPlayer):
             self.keys.append(generate_Key())
-    # The stream which will be used to send new messages to clients
+
     def GameStream(self, request_iterator, context):
         global initMoney
         global bigBlind
@@ -44,8 +43,6 @@ class GameServer(rpc.GameServicer):
         global state
         # Check if there are any new messages
         for item in request_iterator:
-            # print('length of request:', len(self.request[0]), len(self.request[1]), len(self.request[2]))
-            # print('itempos:', item.pos)
             if item.status == -1:
                 # initialize request from the client
                 print('*****client %s initialized!' % item.pos)
@@ -68,7 +65,6 @@ class GameServer(rpc.GameServicer):
                 self.request[item.pos].append(item)
 
             while len(self.response[item.pos]) != 0:
-                # print('server yield a response for position', item.pos)
                 yield self.response[item.pos].pop(0)
 
     def run(self):

@@ -14,7 +14,7 @@ import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
 from ubiqtool.thread_jobs import Job
 import time
-from AI.naive import naive_ai
+# **************************************modify here to use your own AI! ***************************
 from AI.v1_1 import v1_ai
 from lib.texaspoker import State
 from lib.texaspoker import Player
@@ -69,38 +69,28 @@ class Client(object):
         global totalPlayer
         global button
 
-        # print('player position = ', mypos)
-        # print('start in client begin')
         responses = self.conn.GameStream(self.chat_with_server())
-        # print('reponses recieved by the client', mypos)
         for res in responses:
-            # self._lock.acquire()
-            # print('get a reponse from the server')
             self._new_response.append(res)
-            # self._lock.release()
             if res.type == 2:
                 # asking for a decision from the client
                 state.currpos = res.pos
                 if res.pos == mypos:
-
                     decision = self.ai(mypos, state)
                     print('$$$ client made a decision:')
                     print(decision)
-                    # self._lock.acquire()
                     self.add_request(dealer_pb2.DealerRequest(giveup=decision.giveup,
                     allin=decision.allin, check=decision.check, raisebet=decision.raisebet,
                     callbet=decision.callbet, amount=decision.amount, pos=mypos, type=1, token=key))
-                    # self._lock.release()
 
             elif res.type == 1:
                 # sending an info to the client to modify the state
-                print('client received a decision info from the server')
+                print('client received a info from the server and modify the state')
                 print('$$$ giveup=',res.giveup,', check=',res.check,', allin=',res.allin,', callbet=',res.allin,', raisebet=',res.raisebet,
                            ', amount=', res.amount, ', pos=', res.pos)
                 print()
                 state.currpos = res.pos
                 self._decision_so_far.append(res)
-                # update state
                 if res.giveup == 1:
                     state.player[state.currpos].active = False
                     state.playernum -= 1
@@ -116,7 +106,6 @@ class Client(object):
                     delta = state.minbet - state.player[state.currpos].bet
                     state.player[state.currpos].raisebet(delta)
                     state.moneypot += delta
-                    checkflag = 1
 
                 elif res.raisebet == 1:
                     state.last_raised = res.amount - state.minbet
@@ -126,7 +115,8 @@ class Client(object):
                     state.moneypot += delta
 
                 else:
-                    print('impossible')
+                    print('impossible condition')
+                    # assert(0)
 
                 step += 1
                 self._decision_so_far.append(res)
@@ -144,6 +134,7 @@ class Client(object):
                     state.player[res.pos].cards.append(res.num)
                 elif res.command == 'sharedcard':
                     state.sharedcards.append(res.num)
+
             elif res.type == 4:
                 # client initialize
                 assert(step == -1)
@@ -180,10 +171,9 @@ class Client(object):
                     print(printcard(x), end='. ')
                 print('\n')
                 return
+
     def add_request(self, msg):
-        # self._lock.acquire()
         self._new_request.append(msg)
-        # self._lock.release()
 
     @staticmethod
     def HeartBeat():
@@ -199,7 +189,7 @@ def printcard(num):
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        print('Error: enter the pos')
+        print('Error: enter the position for the client!')
     mypos = int(sys.argv[1])
     username = 'bfan'
 # ************************************ modify the following sentence to use your own AI********************************

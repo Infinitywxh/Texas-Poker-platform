@@ -1,5 +1,7 @@
+'''
+    naive_ai: 在合法情况下随机选择放弃、跟注或加注
+'''
 import random
-import os
 from lib.texaspoker import Decision
 
 
@@ -45,8 +47,6 @@ def naive_ai(id, state):
                 t1 = random.randint(low, high)
                 t2 = random.randint(low, t1)
                 decision.amount = random.randint(low, t2)
-
-
         else:
             decision.callbet = 1
 

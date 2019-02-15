@@ -302,14 +302,13 @@ class State(object):
                 continue
 
             decision = Decision()
-            # send state and player info to player[state.currpos]
+
             for i in range(self.totalPlayer):
                 response[i].append(dealer_pb2.DealerRequest(pos=self.currpos, type=2))
-            # run player AI
+
             cnt = 0
             abort = 0
             while len(request[self.currpos]) == 0:
-                # print('waiting for position ', self.currpos)
                 if cnt >= 15:
                     print('*******player %s disconnected, abort*******' % self.currpos)
                     abort = 1
@@ -319,7 +318,6 @@ class State(object):
             if abort == 0:
                 tmp = request[self.currpos].pop(0)
                 decision.update([tmp.giveup, tmp.allin, tmp.check, tmp.callbet, tmp.raisebet, tmp.amount])
-                # receive decision from player, decision = (give-up, allin, check, callbet, raisebet, amount)
             
             else:
                 decision.giveup = 1

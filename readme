@@ -21,11 +21,11 @@ $ 程序的配置与运行方法
 
 4.make
     在主文件夹下，输入make命令
-    linux > make
+    linux> make
 
 5.运行server端
     在主文件夹下，输入命令：
-    linux > /opt/anaconda3/bin/python server.py
+    linux> /opt/anaconda3/bin/python server.py
 
 6.运行各client端
     在client文件夹下，输入命令
@@ -33,10 +33,10 @@ $ 程序的配置与运行方法
     其中n为该client的位置编号，取值为0 ~ totalPlayer-1
 
     例：4玩家模式，则在4个不同的终端下进入client文件夹，分别输入
-    linux > /opt/anaconda3/bin/python client.py 0
-    linux > /opt/anaconda3/bin/python client.py 1
-    linux > /opt/anaconda3/bin/python client.py 2
-    linux > /opt/anaconda3/bin/python client.py 3
+    linux> /opt/anaconda3/bin/python client.py 0
+    linux> /opt/anaconda3/bin/python client.py 1
+    linux> /opt/anaconda3/bin/python client.py 2
+    linux> /opt/anaconda3/bin/python client.py 3
 
 
 $ 平台特性介绍
