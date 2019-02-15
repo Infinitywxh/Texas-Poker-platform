@@ -83,10 +83,6 @@ class Client(object):
                 state.currpos = res.pos
                 if res.pos == mypos:
 
-                    print('##### before decision, state and player:')
-                    print(state)
-                    print(state.player[mypos])
-                   
                     decision = self.ai(mypos, state)
                     print('$$$ client made a decision:')
                     print(decision)
@@ -99,7 +95,9 @@ class Client(object):
             elif res.type == 1:
                 # sending an info to the client to modify the state
                 print('client received a decision info from the server')
-                print('$$$ giveup,check,allin,callbet,raisebet,amount,pos:',res.giveup,res.check,res.allin,res.callbet,res.raisebet,res.amount, res.pos)
+                print('$$$ giveup=',res.giveup,', check=',res.check,', allin=',res.allin,', callbet=',res.allin,', raisebet=',res.raisebet,
+                           ', amount=', res.amount, ', pos=', res.pos)
+                print()
                 state.currpos = res.pos
                 self._decision_so_far.append(res)
                 # update state
@@ -130,9 +128,6 @@ class Client(object):
                 else:
                     print('impossible')
 
-                print('##### after modify, state and player:')
-                print(state)
-                print(state.player[mypos])
                 step += 1
                 self._decision_so_far.append(res)
 
@@ -175,6 +170,11 @@ class Client(object):
 
             elif res.type == 5:
                 # game over info
+                print('***********game over***************')
+                print('sharedcards:', state.sharedcards)
+                for x in state.sharedcards:
+                    print(printcard(x), end='. ')
+                print()
                 print('cards:', state.player[mypos].cards)
                 for x in state.player[mypos].cards:
                     print(printcard(x), end='. ')
@@ -201,9 +201,9 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('Error: enter the pos')
     mypos = int(sys.argv[1])
-
-
     username = 'bfan'
+# ************************************ modify the following sentence to use your own AI********************************
     c = Client(username, v1_ai)
+# *********************************************************************************************************************
     Job(c).start()
     c.start()

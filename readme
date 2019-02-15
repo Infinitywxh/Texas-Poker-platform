@@ -1,44 +1,60 @@
-﻿程序运行方法：
-（目前是3玩家模式，可在linux上正常运行；在server中修改totalplayer可改变玩家人数）
+﻿Texas-Poker-platform
 
-支持断线重连：若某一client在中途掉线，可以重新连接，继续游戏
+$ 程序的配置与运行方法
+1. 设置初始参数
+    在server.py中，可修改如下参数：
+        initMoney 初始钱数
+        bigBlind 大盲注
+        totalPlayer 玩家人数
+        button 庄家位置
 
-AI：
+2. 设置AI
+    (1)在client.py中，增加import语句 'from AI.xx(AI文件名) import xx(AI函数名)
+    例：from AI.naive import naive_ai即使用AI文件夹下naive.py文件中的naive_ai作为AI
+    
+    (2)在client.py最后的main routine中，修改‘# ****……*** modify the following sentence to use your own AI****……*****’
+       下方的句子 'c = Client(username, xx)',其中xx为AI的函数名
+    例：c = Client(username, naive_ai)即使用函数naive_ai作为AI
+    
+3.安装gRPC
+    本程序须在gRPC环境下运行。
+
+4.make
+    在主文件夹下，输入make命令
+    linux > make
+
+5.运行server端
+    在主文件夹下，输入命令：
+    linux > /opt/anaconda3/bin/python server.py
+
+6.运行各client端
+    在client文件夹下，输入命令
+    linux > /opt/anaconda3/bin/python client.py n
+    其中n为该client的位置编号，取值为0 ~ totalPlayer-1
+
+    例：4玩家模式，则在4个不同的终端下进入client文件夹，分别输入
+    linux > /opt/anaconda3/bin/python client.py 0
+    linux > /opt/anaconda3/bin/python client.py 1
+    linux > /opt/anaconda3/bin/python client.py 2
+    linux > /opt/anaconda3/bin/python client.py 3
+
+
+$ 平台特性介绍
+-server端和client端会输出必要的状态信息
+-支持断线重连：若某一client在中途掉线，可以以同一位置重新连接，继续游戏
+-15s等待时间：若某一client在15s后仍未响应，则平台判定其自动弃牌，不再等待
+-可以用人替代AI按照gRPC dealer.proto的格式发送信息，进行游戏
+
+
+$ 内置AI：
 naive-ai：在合法情况下随机选择放弃、跟注或加注
-v1.0，v1.1: 德州扑克AI
-修改client main routine 'c = Client(username, v1_ai)' 中的v1_ai，并修改client开头对应的import模块，
-即可在各版本AI间切换
-
-对于n玩家情况：
-
-make
-
-(以下命令在n个不同终端)
-/opt/anaconda3/bin/python server.py
-/opt/anaconda3/bin/python client.py 0
-/opt/anaconda3/bin/python client.py 1
-……
-/opt/anaconda3/bin/python client.py n-1
-
-（client后面的数字是玩家位置）
+v1.0，v1.1: 更聪明的AI
 
 
-
-server中可修改的参数为：
-initMoney 初始钱数
-bigBlind 大盲注
-totalPlayer 玩家人数
-button 庄家位置
-
-
-
-server-client原理：
-client维护两个队列：request和response。每隔1s，client的run线程向request队列
-压入一个heartbeat询问信息。client的start线程通过chat_with_server句柄向server
+$ server-client通信原理：
+    client维护两个队列：request和response。每隔1s，client的run线程向request队列压入一个heartbeat询问信息。client的start线程通过chat_with_server句柄向server
 传递request，并得到server的GameStream的回应句柄。
-server为每个client维护两个队列：request和response。每当client调用GameStream
-句柄时，server从client的request句柄（chat_with_server）获得一个request，并
+    server为每个client维护两个队列：request和response。每当client调用GameStream句柄时，server从client的request句柄（chat_with_server）获得一个request，并
 返回response队列的一个元素。
-
-当server需要向client传递信息或获取信息时(比如一个决策)，server将相关内容压入其response队列。
-当client收到相关内容，需要向server返回信息时，client将相关信息压入其request队列。
+    当server需要向client传递信息或获取信息时(比如一个决策)，server将相关内容压入其response队列。
+    当client收到相关内容，需要向server返回信息时，client将相关信息压入其request队列。

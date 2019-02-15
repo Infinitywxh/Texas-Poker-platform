@@ -275,9 +275,6 @@ class State(object):
 
     def round_over(self):
         if self.playernum == 1:
-            for i in range(self.totalPlayer):
-                if self.player[i].active == True:
-                    print('Only Winner: player %s' % i)
             return 1
         for i in range(self.totalPlayer):
             if self.player[i].active is True and self.player[i].allin == 0:

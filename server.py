@@ -79,7 +79,9 @@ class GameServer(rpc.GameServicer):
         global state
 
         sleep(2)
-        print('ame started')
+        print()
+        print('totalPlayer:', totalPlayer, 'bigBlind:', bigBlind, 'initMoney:', initMoney, 'button:', button)
+        print('**********game started*************')
         # shuffle the cards
         cardHeap = list(range(0, 52))
         random.shuffle(cardHeap)
@@ -97,7 +99,7 @@ class GameServer(rpc.GameServicer):
             self._response_so_far[i].append(dealer_pb2.DealerRequest(type=3,command='givecard',pos=i,num=cardHeap[heappos]))
             heappos += 1
 
-
+        print()
         # pre-flop begin
         print('$$$ pre-flop begin')
         state.last_raised = bigBlind
@@ -203,23 +205,16 @@ class GameServer(rpc.GameServicer):
         for i in range(totalPlayer):
             self.response[i].append(dealer_pb2.DealerRequest(type=3, command='update'))
             self._response_so_far[i].append(dealer_pb2.DealerRequest(type=3, command='update'))
-
-        print("game ended")
+        print()
+        print("*********game ended************")
 
         # game over, allocate the money pot
 
         totalmoney = state.moneypot
-        print('final player num:', state.playernum)
-        for i in range(totalPlayer):
-            if state.player[i].active == True:
-                print('active:', i)
-        for i in range(totalPlayer):
-            print('player %s totalbet: %s' % ( i, state.player[i].totalbet))
         while state.playernum > 0:
             pos = state.findwinner()
             t = state.player[pos].totalbet
             sum = 0
-            print('winner:',pos)
             for i in range(totalPlayer):
                 sum += min(t, state.player[i].totalbet)
                 state.player[i].totalbet -= min(t, state.player[i].totalbet)
