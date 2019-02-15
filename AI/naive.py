@@ -1,21 +1,6 @@
 import random
 import os
-
-
-class Decision(object):
-    giveup = 0    # 弃牌
-    allin = 0     # allin
-    check = 0     # 看牌
-    callbet = 0   # 跟注
-    raisebet = 0  # 加注
-    amount = 0    # 加注到amount
-
-    def clear(self):
-        self.giveup = self.allin = self.check = self.callbet = self.raisebet = self.amount = 0
-
-    def __str__(self):
-        return 'giveup=%s, allin=%s, check=%s, callbet=%s, raisebet=%s, amount=%s' % (self.giveup,self.allin,self.check,
-                                                                                                    self.callbet, self.raisebet, self.amount)
+from lib.texaspoker import Decision
 
 
 def naive_ai(id, state):

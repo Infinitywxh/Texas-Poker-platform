@@ -1,6 +1,4 @@
 import random
-import os
-from AI.naive import naive_ai
 from time import sleep
 import communicate.dealer_pb2 as dealer_pb2
 import communicate.dealer_pb2_grpc as rpc
